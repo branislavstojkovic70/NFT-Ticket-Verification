@@ -14,5 +14,5 @@ type Ticket struct {
 	DateStart time.Time `json:"date_start" gorm:"column:date_start"`
 	DateEnd   time.Time `json:"date_end" gorm:"column:date_end"`
 	IsUsed    bool      `json:"is_used" gorm:"column:is_used"`
-	Event     Event     `json:"event" gorm:"foreignKey:EventID;references:UUID"`
+	Event     Event     `json:"event" gorm:"foreignKey:EventID;references:ID"`
 }

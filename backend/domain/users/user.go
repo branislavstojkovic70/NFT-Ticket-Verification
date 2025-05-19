@@ -3,19 +3,20 @@ package domain
 import (
 	domain "github.com/branislavstojkovic70/nft-ticket-verification/domain/events"
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 )
 
 type User struct {
-	UUID      uuid.UUID       `json:"uuid" db:"uuid"`
-	Email     string          `json:"email" db:"email"`
-	Password  string          `json:"password" db:"password"`
-	Wallet    string          `json:"wallet" db:"wallet"`
-	Age       int             `json:"age" db:"age"`
-	Location  string          `json:"location" db:"location"`
-	Interests []string        `json:"interests" db:"interests"`
-	Gender    Gender          `json:"gender" db:"gender"`
-	Name      string          `json:"name" db:"name"`
-	Surname   string          `json:"surname" db:"surname"`
-	Role      Role            `json:"role" db:"role"`
-	Tickets   []domain.Ticket `json:"tickets" db:"-"`
+	ID        uuid.UUID       `json:"uuid" gorm:"type:uuid;primaryKey;column:uuid"`
+	Email     string          `json:"email" gorm:"column:email"`
+	Password  string          `json:"password" gorm:"column:password"`
+	Wallet    string          `json:"wallet" gorm:"column:wallet"`
+	Age       int             `json:"age" gorm:"column:age"`
+	Location  string          `json:"location" gorm:"column:location"`
+	Interests datatypes.JSON  `json:"interests" gorm:"column:interests;type:json"` // moraš parsirati u kodu
+	Gender    Gender          `json:"gender" gorm:"column:gender"`
+	Name      string          `json:"name" gorm:"column:name"`
+	Surname   string          `json:"surname" gorm:"column:surname"`
+	Role      Role            `json:"role" gorm:"column:role"`
+	Tickets   []domain.Ticket `json:"tickets" gorm:"foreignKey:UserID;references:ID"`
 }

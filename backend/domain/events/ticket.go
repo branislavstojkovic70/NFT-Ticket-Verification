@@ -7,10 +7,12 @@ import (
 )
 
 type Ticket struct {
-	UUID      uuid.UUID `json:"uuid" db:"uuid"`
-	Price     float64   `json:"price" db:"price"`
-	DateStart time.Time `json:"date_start" db:"date_start"`
-	DateEnd   time.Time `json:"date_end" db:"date_end"`
-	IsUsed    bool      `json:"is_used" db:"is_used"`
-	Event     Event     `json:"event" db:"-"`
+	ID        uuid.UUID `json:"uuid" gorm:"type:uuid;primaryKey;column:uuid"`
+	UserID    uuid.UUID `json:"user_id" gorm:"column:user_id"`
+	EventID   uuid.UUID `json:"event_id" gorm:"column:event_id"`
+	Price     float64   `json:"price" gorm:"column:price"`
+	DateStart time.Time `json:"date_start" gorm:"column:date_start"`
+	DateEnd   time.Time `json:"date_end" gorm:"column:date_end"`
+	IsUsed    bool      `json:"is_used" gorm:"column:is_used"`
+	Event     Event     `json:"event" gorm:"foreignKey:EventID;references:UUID"`
 }

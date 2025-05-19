@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 )
 
 type EventType string
@@ -14,12 +15,12 @@ const (
 )
 
 type Event struct {
-	UUID        uuid.UUID `json:"uuid" db:"uuid"`
-	Location    string    `json:"location" db:"location"`
-	Type        EventType `json:"type" db:"type"`
-	DateStart   time.Time `json:"date_start" db:"date_start"`
-	DateEnd     time.Time `json:"date_end" db:"date_end"`
-	Description string    `json:"description" db:"description"`
-	Title       string    `json:"title" db:"title"`
-	Tags        []string  `json:"tags" db:"tags"`
+	ID          uuid.UUID      `json:"uuid" gorm:"type:uuid;primaryKey;column:uuid"`
+	Location    string         `json:"location" gorm:"column:location"`
+	Type        EventType      `json:"type" gorm:"column:type"`
+	DateStart   time.Time      `json:"date_start" gorm:"column:date_start"`
+	DateEnd     time.Time      `json:"date_end" gorm:"column:date_end"`
+	Description string         `json:"description" gorm:"column:description"`
+	Title       string         `json:"title" gorm:"column:title"`
+	Tags        datatypes.JSON `json:"tags" gorm:"column:tags;type:json"`
 }

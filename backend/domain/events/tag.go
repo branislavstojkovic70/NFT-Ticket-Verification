@@ -3,6 +3,6 @@ package domain
 import "github.com/google/uuid"
 
 type Tag struct {
-	UUID uuid.UUID `json:"uuid" db:"uuid"`
-	Name string    `json:"name" db:"name"`
+	ID   uuid.UUID `json:"uuid" gorm:"type:uuid;primaryKey;column:uuid"`
+	Name string    `json:"name" gorm:"column:name"`
 }

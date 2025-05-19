@@ -13,7 +13,7 @@ func InitRoutes(server *gin.Engine) {
 	{
 		userRoutes.GET("/", func(c *gin.Context) {
 			c.String(http.StatusOK, "Hello from HTTP server")
-		})	
+		})
 		// // Handle the GET requests at /u/login
 		// // Show the login page
 		// // Ensure that the user is not logged in by using the middleware

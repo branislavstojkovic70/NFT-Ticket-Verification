@@ -19,7 +19,7 @@ type Env struct {
 func NewEnv() *Env {
 	env := Env{}
 
-	viper.SetConfigFile("../.env")
+	viper.SetConfigFile(".env")
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()

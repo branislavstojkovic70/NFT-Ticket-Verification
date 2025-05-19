@@ -3,16 +3,16 @@ package repository
 import (
 	"errors"
 
-	domain "github.com/branislavstojkovic70/nft-ticket-verification/domain/users"
+	users "github.com/branislavstojkovic70/nft-ticket-verification/domain/users"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type AdminRepository interface {
-	GetAllAdmins() ([]domain.Admin, error)
-	GetAdminByID(id uuid.UUID) (*domain.Admin, error)
-	CreateAdmin(admin *domain.Admin) error
-	UpdateAdmin(admin *domain.Admin) error
+	GetAllAdmins() ([]users.Admin, error)
+	GetAdminByID(id uuid.UUID) (*users.Admin, error)
+	CreateAdmin(admin *users.Admin) error
+	UpdateAdmin(admin *users.Admin) error
 	DeleteAdmin(id uuid.UUID) error
 }
 
@@ -24,16 +24,16 @@ func NewAdminRepository(db *gorm.DB) AdminRepository {
 	return &adminRepository{db}
 }
 
-func (r *adminRepository) GetAllAdmins() ([]domain.Admin, error) {
-	var admins []domain.Admin
+func (r *adminRepository) GetAllAdmins() ([]users.Admin, error) {
+	var admins []users.Admin
 	if err := r.db.Find(&admins).Error; err != nil {
 		return nil, err
 	}
 	return admins, nil
 }
 
-func (r *adminRepository) GetAdminByID(id uuid.UUID) (*domain.Admin, error) {
-	var admin domain.Admin
+func (r *adminRepository) GetAdminByID(id uuid.UUID) (*users.Admin, error) {
+	var admin users.Admin
 	if err := r.db.First(&admin, "uuid = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -43,14 +43,14 @@ func (r *adminRepository) GetAdminByID(id uuid.UUID) (*domain.Admin, error) {
 	return &admin, nil
 }
 
-func (r *adminRepository) CreateAdmin(admin *domain.Admin) error {
+func (r *adminRepository) CreateAdmin(admin *users.Admin) error {
 	return r.db.Create(admin).Error
 }
 
-func (r *adminRepository) UpdateAdmin(admin *domain.Admin) error {
+func (r *adminRepository) UpdateAdmin(admin *users.Admin) error {
 	return r.db.Save(admin).Error
 }
 
 func (r *adminRepository) DeleteAdmin(id uuid.UUID) error {
-	return r.db.Delete(&domain.Admin{}, "uuid = ?", id).Error
+	return r.db.Delete(&users.Admin{}, "uuid = ?", id).Error
 }

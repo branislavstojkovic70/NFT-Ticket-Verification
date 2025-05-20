@@ -14,7 +14,7 @@ type App struct {
 func Run() App {
 	app := App{}
 	app.Env = NewEnv()
-	app.HttpServer = InitHttpServer(app.Env.ServerPort)
 	app.Db, _ = InitDB(app.Env.DBHost, app.Env.DBUser, app.Env.DBPass, app.Env.DBName, app.Env.DBPort)
+	app.HttpServer = InitHttpServer(app.Env.ServerPort, app.Db)
 	return app
 }

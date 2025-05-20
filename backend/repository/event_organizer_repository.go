@@ -26,7 +26,7 @@ func NewOrganizerRepository(db *gorm.DB) OrganizerRepository {
 
 func (r *organizerRepository) GetAllOrganizers() ([]users.Organizer, error) {
 	var organizers []users.Organizer
-	if err := r.db.Find(&organizers).Error; err != nil {
+	if err := r.db.Preload("Events").Find(&organizers).Error; err != nil {
 		return nil, err
 	}
 	return organizers, nil
@@ -34,7 +34,7 @@ func (r *organizerRepository) GetAllOrganizers() ([]users.Organizer, error) {
 
 func (r *organizerRepository) GetOrganizerByID(id uuid.UUID) (*users.Organizer, error) {
 	var organizer users.Organizer
-	if err := r.db.First(&organizer, "uuid = ?", id).Error; err != nil {
+	if err := r.db.Preload("Events").First(&organizer, "uuid = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -48,7 +48,7 @@ func (r *organizerRepository) CreateOrganizer(org *users.Organizer) error {
 }
 
 func (r *organizerRepository) UpdateOrganizer(org *users.Organizer) error {
-	return r.db.Save(org).Error
+	return r.db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(org).Error
 }
 
 func (r *organizerRepository) DeleteOrganizer(id uuid.UUID) error {

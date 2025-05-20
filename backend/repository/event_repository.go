@@ -11,6 +11,7 @@ import (
 type EventRepository interface {
 	GetAllEvents() ([]events.Event, error)
 	GetEventByID(id uuid.UUID) (*events.Event, error)
+	GetEventsByOrganizerID(organizerID uuid.UUID) ([]events.Event, error)
 	CreateEvent(event *events.Event) error
 	UpdateEvent(event *events.Event) error
 	DeleteEvent(id uuid.UUID) error
@@ -25,11 +26,11 @@ func NewEventRepository(db *gorm.DB) EventRepository {
 }
 
 func (r *eventRepository) GetAllEvents() ([]events.Event, error) {
-	var events []events.Event
-	if err := r.db.Find(&events).Error; err != nil {
+	var eventsList []events.Event
+	if err := r.db.Find(&eventsList).Error; err != nil {
 		return nil, err
 	}
-	return events, nil
+	return eventsList, nil
 }
 
 func (r *eventRepository) GetEventByID(id uuid.UUID) (*events.Event, error) {
@@ -41,6 +42,14 @@ func (r *eventRepository) GetEventByID(id uuid.UUID) (*events.Event, error) {
 		return nil, err
 	}
 	return &event, nil
+}
+
+func (r *eventRepository) GetEventsByOrganizerID(organizerID uuid.UUID) ([]events.Event, error) {
+	var eventsList []events.Event
+	if err := r.db.Where("organizer_id = ?", organizerID).Find(&eventsList).Error; err != nil {
+		return nil, err
+	}
+	return eventsList, nil
 }
 
 func (r *eventRepository) CreateEvent(event *events.Event) error {

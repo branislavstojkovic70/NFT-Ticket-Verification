@@ -56,37 +56,6 @@ func SeedTestData(db *gorm.DB) error {
 	tags := []string{"technology", "music", "festival"}
 	tagsJSON, _ := json.Marshal(tags)
 
-	// Events
-	event1 := events.Event{
-		ID:          uuid.New(),
-		Location:    "Belgrade",
-		Type:        events.Music,
-		DateStart:   time.Now().AddDate(0, 1, 0),
-		DateEnd:     time.Now().AddDate(0, 1, 1),
-		Description: "Summer music festival",
-		Title:       "Belgrade Beats",
-		Tags:        tagsJSON,
-	}
-	if err := db.Create(&event1).Error; err != nil {
-		log.Println("Failed to create event1:", err)
-		return err
-	}
-
-	event2 := events.Event{
-		ID:          uuid.New(),
-		Location:    "Novi Sad",
-		Type:        events.Conference,
-		DateStart:   time.Now().AddDate(0, 2, 0),
-		DateEnd:     time.Now().AddDate(0, 2, 2),
-		Description: "Tech conference",
-		Title:       "NS Tech 2025",
-		Tags:        tagsJSON,
-	}
-	if err := db.Create(&event2).Error; err != nil {
-		log.Println("Failed to create event2:", err)
-		return err
-	}
-
 	// Users
 	interests := []string{"blockchain", "music", "sports"}
 	interestsJSON, _ := json.Marshal(interests)
@@ -127,7 +96,7 @@ func SeedTestData(db *gorm.DB) error {
 		return err
 	}
 
-	// Organizer
+	// Organizer (create first so we can assign events to them)
 	organizer := users.Organizer{
 		ID:       uuid.New(),
 		Email:    "organizer@example.com",
@@ -140,6 +109,39 @@ func SeedTestData(db *gorm.DB) error {
 	}
 	if err := db.Create(&organizer).Error; err != nil {
 		log.Println("Failed to create organizer:", err)
+		return err
+	}
+
+	// Events assigned to the organizer
+	event1 := events.Event{
+		ID:          uuid.New(),
+		Location:    "Belgrade",
+		Type:        events.Music,
+		DateStart:   time.Now().AddDate(0, 1, 0),
+		DateEnd:     time.Now().AddDate(0, 1, 1),
+		Description: "Summer music festival",
+		Title:       "Belgrade Beats",
+		Tags:        tagsJSON,
+		OrganizerID: organizer.ID,
+	}
+	if err := db.Create(&event1).Error; err != nil {
+		log.Println("Failed to create event1:", err)
+		return err
+	}
+
+	event2 := events.Event{
+		ID:          uuid.New(),
+		Location:    "Novi Sad",
+		Type:        events.Conference,
+		DateStart:   time.Now().AddDate(0, 2, 0),
+		DateEnd:     time.Now().AddDate(0, 2, 2),
+		Description: "Tech conference",
+		Title:       "NS Tech 2025",
+		Tags:        tagsJSON,
+		OrganizerID: organizer.ID,
+	}
+	if err := db.Create(&event2).Error; err != nil {
+		log.Println("Failed to create event2:", err)
 		return err
 	}
 
@@ -168,7 +170,6 @@ func SeedTestData(db *gorm.DB) error {
 		DateStart: event1.DateStart,
 		DateEnd:   event1.DateEnd,
 		IsUsed:    false,
-		Event:     event1,
 	}
 	if err := db.Create(&ticket1).Error; err != nil {
 		log.Println("Failed to create ticket1:", err)
@@ -183,7 +184,6 @@ func SeedTestData(db *gorm.DB) error {
 		DateStart: event2.DateStart,
 		DateEnd:   event2.DateEnd,
 		IsUsed:    true,
-		Event:     event2,
 	}
 	if err := db.Create(&ticket2).Error; err != nil {
 		log.Println("Failed to create ticket2:", err)

@@ -14,7 +14,9 @@ type Env struct {
 	DBUser        string `mapstructure:"DB_USER"`
 	DBPass        string `mapstructure:"DB_PASS"`
 	DBName        string `mapstructure:"DB_NAME"`
-	InfuraKey 	  string `mapstructure:"INFURA_KEY"`
+	InfuraKey     string `mapstructure:"INFURA_KEY"`
+	InfuraUrl     string `mapstructure:"INFURA_URL"`
+	ChainID       string `mapstructure:"CHAIN_ID"`
 }
 
 func NewEnv() *Env {

@@ -1,1 +1,10 @@
+# Ignore compiled binaries
+/bin/
+
+# Ignore environment config
 .env
+
+# Ignore IDE and OS files
+.vscode/
+.idea/
+.DS_Store

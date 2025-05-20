@@ -3,8 +3,20 @@ package route
 import (
 	"net/http"
 
+	"github.com/branislavstojkovic70/nft-ticket-verification/api/controller"
 	"github.com/gin-gonic/gin"
 )
+
+func RegisterUserRoutes(router *gin.Engine, userController *controller.UserController) {
+	userRoutes := router.Group("/user")
+	{
+		userRoutes.GET("/", userController.GetAllUsers)
+		userRoutes.GET("/:id", userController.GetUserByID)
+		userRoutes.POST("/", userController.CreateUser)
+		userRoutes.PUT("/:id", userController.UpdateUser)
+		userRoutes.DELETE("/:id", userController.DeleteUser)
+	}
+}
 
 func InitRoutes(server *gin.Engine) {
 

@@ -76,10 +76,6 @@ contract EventManager {
             });
         }
 
-        (bool success, ) = payable(address(this)).call{value: msg.value}("");
-
-        if (!success) revert EventManager_TransactionFailed();
-
         EventData memory newEvent = EventData({
             UUID: _UUID,
             Title: _Title,
@@ -133,10 +129,6 @@ contract Event is ERC721 {
 
         if (msg.value < eventData.priceOfTicket) 
             revert Event_InsufficientFunds({ amount: msg.value, required: eventData.priceOfTicket});
-
-        (bool success, ) = payable(address(this)).call{value: msg.value}("");
-
-        if (!success) revert Event_TransactionFailed();
 
         ticketCounter += 1;
 

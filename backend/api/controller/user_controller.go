@@ -54,7 +54,6 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user.ID = uuid.New() // assign ID manually
 	if err := uc.userService.CreateUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return

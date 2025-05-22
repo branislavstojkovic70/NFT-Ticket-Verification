@@ -4,6 +4,7 @@ import (
 	users "github.com/branislavstojkovic70/nft-ticket-verification/domain/users"
 	"github.com/branislavstojkovic70/nft-ticket-verification/repository"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
@@ -31,7 +32,13 @@ func (s *userService) GetUserByID(id uuid.UUID) (*users.User, error) {
 }
 
 func (s *userService) CreateUser(user *users.User) error {
-	// Dodaj logiku validacije ako želiš (email format, itd.)
+	user.ID = uuid.New()
+	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.Password = string(bytes)
+	user.Role = users.RoleUser
 	return s.repo.CreateUser(user)
 }
 

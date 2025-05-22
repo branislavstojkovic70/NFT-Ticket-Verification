@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 ///The sender is not the owner
 error EventManager_NotOwner();
@@ -44,22 +45,16 @@ struct EventData {
     uint256 priceOfTicket;
 }
 
-contract EventManager {
+contract EventManager is Ownable {
     //Constants
     uint256 public constant PRICE = 1e12;
     
-    //Public
-    address public immutable owner;
-
+    constructor() Ownable(msg.sender){}
     //EVENTS
     event Created(address _creator, address _event);
 
     //MAPPING
     mapping(address => EventData[]) public userEvents;
-
-    constructor() {
-        owner = msg.sender;
-    }
 
     function createEvent(
         string memory _UUID,
@@ -96,22 +91,14 @@ contract EventManager {
         (bool success, ) = payable(msg.sender).call{value: balance}("");
         if (!success) revert EventManager_TransactionFailed();
     }
-
-    modifier onlyOwner() {
-        if (msg.sender != owner){
-            revert EventManager_NotOwner();
-        }
-        _;
-    }
 }
 
-contract Event is ERC721 {
-    address immutable public owner;
+contract Event is ERC721,Ownable {
     EventData public eventData;
     uint public ticketCounter;
 
     mapping(uint => bool) ticketsUsed;
-
+    mapping(address => uint[]) ticketsIds;
     event TicketPurchased(address indexed _buyer, uint ticket);
 
     constructor(
@@ -119,12 +106,12 @@ contract Event is ERC721 {
         EventData memory _eventData
     )
         ERC721(_eventData.Title, getSymbol(_eventData.Title))
+        Ownable(_owner)
     {
-        owner = _owner;
         eventData = _eventData;
     }
 
-    function buyTicket() external payable eventNotExpired  {
+    function buyTicket() external payable eventNotExpired {
         if (eventData.numberOfTickets == ticketCounter) revert Event_SoldOut();
 
         if (msg.value < eventData.priceOfTicket) 
@@ -134,11 +121,12 @@ contract Event is ERC721 {
 
         _safeMint(msg.sender, ticketCounter);
         ticketsUsed[ticketCounter] = false;
+        ticketsIds[msg.sender].push(ticketCounter);
 
         emit TicketPurchased(msg.sender, ticketCounter);
     }
 
-    function refundTicket(uint ticketId) external eventNotExpired {
+    function refundTicket(uint ticketId) external eventNotExpired  {
         if (ticketsUsed[ticketId]) revert Event_TicketUsed();
         
         if (block.timestamp > eventData.startDate) revert Event_EventStarted();
@@ -153,12 +141,12 @@ contract Event is ERC721 {
         if (!success) revert Event_TransactionFailed();
     }
 
-    function markAsUsed(uint ticketId) external eventNotExpired {
+    function markAsUsed(uint ticketId) external eventNotExpired  {
         if (ticketsUsed[ticketId]) revert Event_TicketUsed();
         ticketsUsed[ticketId] = true;
     }
 
-    function withdraw () external eventExpired {
+    function withdraw () external  eventExpired onlyOwner {
         uint balance = address(this).balance;
         if (balance == 0) revert Event_ZeroBalance();
         (bool success, ) = payable(msg.sender).call{value: balance}("");
@@ -172,6 +160,14 @@ contract Event is ERC721 {
             result[i] = b[i];
         }
         return string(result);
+    }
+
+    function getTicketsIds(address user) external view returns (uint[] memory ids) {
+        return (ticketsIds[user]);
+    }
+
+    function isUsedTicket(uint id) external view returns (bool isUsed) {
+        return (ticketsUsed[id]);
     }
 
     modifier eventNotExpired() {

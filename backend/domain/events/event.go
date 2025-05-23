@@ -24,4 +24,5 @@ type Event struct {
 	Title       string         `json:"title" gorm:"column:title"`
 	Tags        datatypes.JSON `json:"tags" gorm:"column:tags;type:json"`
 	OrganizerID uuid.UUID      `json:"organizer_id" gorm:"column:organizer_id;type:uuid"`
+	NumberOfTickets int 	   `json:"number_of_tickets" gorm:"column:number_of_tickets"`
 }

@@ -134,6 +134,7 @@ func SeedTestData(db *gorm.DB) error {
 		Title:       "Belgrade Beats",
 		Tags:        tagsJSON,
 		OrganizerID: organizer.ID,
+		NumberOfTickets: 13,
 	}
 	if err := db.Create(&event1).Error; err != nil {
 		log.Println("Failed to create event1:", err)
@@ -150,6 +151,7 @@ func SeedTestData(db *gorm.DB) error {
 		Title:       "NS Tech 2025",
 		Tags:        tagsJSON,
 		OrganizerID: organizer.ID,
+		NumberOfTickets: 15,
 	}
 	if err := db.Create(&event2).Error; err != nil {
 		log.Println("Failed to create event2:", err)

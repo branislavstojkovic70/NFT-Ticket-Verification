@@ -9,6 +9,7 @@ import (
 	events "github.com/branislavstojkovic70/nft-ticket-verification/domain/events"
 	users "github.com/branislavstojkovic70/nft-ticket-verification/domain/users"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -56,14 +57,24 @@ func SeedTestData(db *gorm.DB) error {
 	tags := []string{"technology", "music", "festival"}
 	tagsJSON, _ := json.Marshal(tags)
 
-	// Users
+	// Interests
 	interests := []string{"blockchain", "music", "sports"}
 	interestsJSON, _ := json.Marshal(interests)
 
+	// Hash passwords
+	hash := func(password string) string {
+		hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			log.Fatalf("Failed to hash password: %v", err)
+		}
+		return string(hashed)
+	}
+
+	// Users
 	user1 := users.User{
 		ID:        uuid.New(),
 		Email:     "user1@example.com",
-		Password:  "hashedpassword1",
+		Password:  hash("password1"),
 		Wallet:    "wallet_1",
 		Age:       25,
 		Location:  "Belgrade",
@@ -81,7 +92,7 @@ func SeedTestData(db *gorm.DB) error {
 	user2 := users.User{
 		ID:        uuid.New(),
 		Email:     "user2@example.com",
-		Password:  "hashedpassword2",
+		Password:  hash("password2"),
 		Wallet:    "wallet_2",
 		Age:       30,
 		Location:  "Novi Sad",
@@ -96,11 +107,11 @@ func SeedTestData(db *gorm.DB) error {
 		return err
 	}
 
-	// Organizer (create first so we can assign events to them)
+	// Organizer
 	organizer := users.Organizer{
 		ID:       uuid.New(),
 		Email:    "organizer@example.com",
-		Password: "hashedorganizer",
+		Password: hash("organizer123"),
 		Wallet:   "wallet_org",
 		Name:     "Ognjen",
 		Surname:  "Organizator",
@@ -112,7 +123,7 @@ func SeedTestData(db *gorm.DB) error {
 		return err
 	}
 
-	// Events assigned to the organizer
+	// Events
 	event1 := events.Event{
 		ID:          uuid.New(),
 		Location:    "Belgrade",
@@ -149,7 +160,7 @@ func SeedTestData(db *gorm.DB) error {
 	admin := users.Admin{
 		ID:       uuid.New(),
 		Email:    "admin@example.com",
-		Password: "hashedadmin",
+		Password: hash("admin123"),
 		Wallet:   "wallet_admin",
 		Name:     "Ana",
 		Surname:  "Adminović",

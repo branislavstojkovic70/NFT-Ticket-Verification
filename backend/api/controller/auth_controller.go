@@ -7,9 +7,16 @@ import (
 	users "github.com/branislavstojkovic70/nft-ticket-verification/domain/users"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
+
+type AuthController struct{}
+
+func NewAuthController() *AuthController {
+	return &AuthController{}
+}
 
 type LoginRequest struct {
 	Email    string     `json:"email" binding:"required,email"`
@@ -17,7 +24,7 @@ type LoginRequest struct {
 	Role     users.Role `json:"role" binding:"required"`
 }
 
-func Login(db *gorm.DB, c *gin.Context, jwt_secret string) {
+func (a *AuthController) Login(db *gorm.DB, c *gin.Context, jwtSecret string) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Nevalidan unos"})
@@ -25,7 +32,7 @@ func Login(db *gorm.DB, c *gin.Context, jwt_secret string) {
 	}
 
 	var (
-		userID         interface{}
+		userID         uuid.UUID
 		hashedPassword string
 		role           users.Role
 	)
@@ -33,7 +40,7 @@ func Login(db *gorm.DB, c *gin.Context, jwt_secret string) {
 	switch req.Role {
 	case users.RoleUser:
 		var user users.User
-		if err := db.First("email = ?", req.Email).First(&user).Error; err != nil {
+		if err := db.Where("email = ?", req.Email).First(&user).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravan email ili lozinka"})
 			return
 		}
@@ -43,7 +50,7 @@ func Login(db *gorm.DB, c *gin.Context, jwt_secret string) {
 
 	case users.RoleOrganizer:
 		var organizer users.Organizer
-		if err := db.First("email = ?", req.Email).First(&organizer).Error; err != nil {
+		if err := db.Where("email = ?", req.Email).First(&organizer).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravan email ili lozinka"})
 			return
 		}
@@ -53,7 +60,7 @@ func Login(db *gorm.DB, c *gin.Context, jwt_secret string) {
 
 	case users.RoleAdmin:
 		var admin users.Admin
-		if err := db.First("email = ?", req.Email).First(&admin).Error; err != nil {
+		if err := db.Where("email = ?", req.Email).First(&admin).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravan email ili lozinka"})
 			return
 		}
@@ -72,16 +79,20 @@ func Login(db *gorm.DB, c *gin.Context, jwt_secret string) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": userID,
-		"role":    role,
+		"user_id": userID.String(),
+		"role":    string(role),
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
 	})
 
-	tokenString, err := token.SignedString(jwt_secret)
+	tokenString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Greška pri generisanju tokena"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	c.JSON(http.StatusOK, gin.H{
+		"token": tokenString,
+		"role":  role,
+		"id":    userID,
+	})
 }

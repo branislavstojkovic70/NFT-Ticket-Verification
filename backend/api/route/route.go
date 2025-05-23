@@ -11,4 +11,5 @@ func InitRoutes(server *gin.Engine, db *gorm.DB, jwt_secret string) {
 	RegisterAdminRoutes(server, db)
 	RegisterTicketRoutes(server, db)
 	RegisterEventOrganizerRoutes(server, db)
+	RegisterAuthRoutes(server, db, jwt_secret)
 }

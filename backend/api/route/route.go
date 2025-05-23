@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitRoutes(server *gin.Engine, db *gorm.DB) {
+func InitRoutes(server *gin.Engine, db *gorm.DB, jwt_secret string) {
 	RegisterUserRoutes(server, db)
 	RegisterEventRoutes(server, db)
 	RegisterAdminRoutes(server, db)

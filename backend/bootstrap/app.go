@@ -17,7 +17,7 @@ func Run() App {
 	app := App{}
 	app.Env = NewEnv()
 	app.Db, _ = InitDB(app.Env.DBHost, app.Env.DBUser, app.Env.DBPass, app.Env.DBName, app.Env.DBPort)
-	app.HttpServer = InitHttpServer(app.Env.ServerPort, app.Db)
+	app.HttpServer = InitHttpServer(app.Env.ServerPort, app.Db, app.Env.JWTSecret)
 	app.EthClient = eth.Init(app.Env.InfuraUrl, app.Env.ChainID)
 	return app
 }

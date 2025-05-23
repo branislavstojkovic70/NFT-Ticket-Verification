@@ -17,6 +17,7 @@ type Env struct {
 	InfuraKey     string `mapstructure:"INFURA_KEY"`
 	InfuraUrl     string `mapstructure:"INFURA_URL"`
 	ChainID       string `mapstructure:"CHAIN_ID"`
+	JWTSecret     string `mapstructure:"JWT_SECRET"`
 }
 
 func NewEnv() *Env {

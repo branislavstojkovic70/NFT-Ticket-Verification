@@ -34,7 +34,7 @@ error Event_NotOwner();
 /// Nothing to withdraw.
 error Event_ZeroBalance();
 
-enum EventType { Conference, Workshop, Webinar }
+enum EventType { Conference, Music }
 
 struct EventData {
     string UUID;

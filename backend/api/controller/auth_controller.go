@@ -35,6 +35,8 @@ func (a *AuthController) Login(db *gorm.DB, c *gin.Context, jwtSecret string) {
 		userID         uuid.UUID
 		hashedPassword string
 		role           users.Role
+		email 		   string
+		wallet 		   string
 	)
 
 	switch req.Role {
@@ -47,6 +49,8 @@ func (a *AuthController) Login(db *gorm.DB, c *gin.Context, jwtSecret string) {
 		userID = user.ID
 		hashedPassword = user.Password
 		role = user.Role
+		email = user.Email
+		wallet = user.Wallet
 
 	case users.RoleOrganizer:
 		var organizer users.Organizer
@@ -57,6 +61,8 @@ func (a *AuthController) Login(db *gorm.DB, c *gin.Context, jwtSecret string) {
 		userID = organizer.ID
 		hashedPassword = organizer.Password
 		role = organizer.Role
+		email = organizer.Email
+		wallet = organizer.Wallet
 
 	case users.RoleAdmin:
 		var admin users.Admin
@@ -67,6 +73,8 @@ func (a *AuthController) Login(db *gorm.DB, c *gin.Context, jwtSecret string) {
 		userID = admin.ID
 		hashedPassword = admin.Password
 		role = admin.Role
+		email = admin.Email
+		wallet = admin.Wallet
 
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Nepoznata uloga"})
@@ -81,6 +89,8 @@ func (a *AuthController) Login(db *gorm.DB, c *gin.Context, jwtSecret string) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userID.String(),
 		"role":    string(role),
+		"sub":     email,
+		"wallet":  wallet,
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
 	})
 
@@ -92,7 +102,5 @@ func (a *AuthController) Login(db *gorm.DB, c *gin.Context, jwtSecret string) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"token": tokenString,
-		"role":  role,
-		"id":    userID,
 	})
 }

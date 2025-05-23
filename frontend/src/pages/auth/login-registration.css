@@ -1,0 +1,27 @@
+#main-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100vw;
+}
+
+#logo-slogan {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+#logo {
+    height: 80%;
+    width: 80%;
+    margin: 0;
+}
+
+#slogan {
+    font-family: "Poppins", sans-serif;
+
+}

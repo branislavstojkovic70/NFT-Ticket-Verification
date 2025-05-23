@@ -10,7 +10,7 @@ func RegisterAuthRoutes(server *gin.Engine, db *gorm.DB, jwt_secret string) {
 	ctrl := controller.NewAuthController()
 	authRoutes := server.Group("/auth")
 	{
-		authRoutes.POST("/", func(c *gin.Context) {
+		authRoutes.POST("/login", func(c *gin.Context) {
 			ctrl.Login(db, c, jwt_secret)
 		})
 	}

@@ -7,18 +7,52 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+# Build output
+build
 dist
 dist-ssr
-*.local
+coverage
 
-# Editor directories and files
+# Dependency directories
+node_modules/
+
+# Local env files
+.env
+.env.*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE/editor files
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Parcel cache
+.cache/
+
+# Testing
+jest-cache/
+jest.config.js
+coverage/
+*.lcov
+
+# Storybook
+.out/
+storybook-static/
+
+# Misc
+*.tgz
+*.local
+*.lock-wscript
+*.tsbuildinfo

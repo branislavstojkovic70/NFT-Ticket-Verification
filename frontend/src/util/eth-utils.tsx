@@ -1,37 +1,8 @@
 import { ethers } from "ethers";
+import { CONTRACTS } from "./contract-utils";
 
 const EVENT_MANAGER_ADDRESS = "0xYourContractAddress";
-
-// export async function estimateGasLimit({
-//     providerUrl,
-//     contractAddress,
-//     abi,
-//     methodName,
-//     methodArgs,
-//     fromAddress
-//   }: {
-//     providerUrl: string;
-//     contractAddress: string;
-//     abi: any[];
-//     methodName: string;
-//     methodArgs: any[];
-//     fromAddress: string;
-//   }) {
-//     try {
-//       const provider = new ethers.JsonRpcProvider(providerUrl);
-//       const contract = new ethers.Contract(contractAddress, abi, provider);
-//       const estimatedGas = await contract.est[methodName](...methodArgs, {
-//         from: fromAddress
-//       });
-  
-//       // Optionally add buffer
-//       const gasLimitWithBuffer = estimatedGas.mul(ethers.toBigInt(1.1)); // +10%
-//       return gasLimitWithBuffer;
-//     } catch (error) {
-//       console.error('Gas estimation failed:', error);
-//       throw error;
-//     }
-//   }
+const RELAY_ENDPOINT = "http://localhost:8080/relay-tx";
 
 export async function prepareSignedCreateEventTx({
   uuid,
@@ -48,46 +19,70 @@ export async function prepareSignedCreateEventTx({
   numberOfTickets: number;
   priceOfTicket: bigint;
 }) {
-  if (!window.ethereum) throw new Error("MetaMask not available");
+  if (!(window as any).ethereum) throw new Error("MetaMask not available");
 
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  const signer = await provider.getSigner();
-  const address = await signer.getAddress();
+  try {
+    const provider = new ethers.BrowserProvider((window as any).ethereum);
+    const signer = await provider.getSigner();
+    const address = await signer.getAddress();
 
-  const contractInterface = new ethers.Interface(EventManagerAbi);
-  const data = contractInterface.encodeFunctionData("createEvent", [
-    uuid,
-    title,
-    startDate,
-    endDate,
-    numberOfTickets,
-    priceOfTicket
-  ]);
+    // Get current gas price from network
+    const gasPrice = await provider.getFeeData().then(data => data.gasPrice);
+    if (!gasPrice) throw new Error("Could not fetch gas price");
 
-  const gasPrice = 1000;
+    const contractInterface = new ethers.Interface(CONTRACTS.EventManager.abi);
+    const data = contractInterface.encodeFunctionData("createEvent", [
+      uuid,
+      title,
+      startDate,
+      endDate,
+      numberOfTickets,
+      priceOfTicket
+    ]);
 
-  const tx = {
-    from: address,
-    to: EVENT_MANAGER_ADDRESS,
-    data,
-    value: ethers.parseUnits("0.000001", "ether"), // PRICE
-    0,
-    gasLimit: 300000n,
-    gasPrice
-  };
+    // Estimate gas limit
+    const estimatedGas = await provider.estimateGas({
+      from: address,
+      to: EVENT_MANAGER_ADDRESS,
+      data
+    });
+    
+    const gasLimit = estimatedGas * 120n / 100n;
 
-  // Potpisivanje
-  const rawTx = await signer.signTransaction(tx);
+    const tx = {
+      from: address,
+      to: EVENT_MANAGER_ADDRESS,
+      data,
+      value: ethers.parseUnits("0.000001", "ether"),
+      gasLimit,
+      gasPrice,
+      chainId: (await provider.getNetwork()).chainId,
+      nonce: await provider.getTransactionCount(address, "latest")
+    };
 
-  // Šalji na server
-  const res = await fetch("http://localhost:8080/relay-tx", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ rawTx })
-  });
+    const signedTx = await signer.signTransaction(tx);
+    
+    const response = await fetch(RELAY_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        signedTx,
+        txData: { // Additional context for backend
+          method: "createEvent",
+          params: { uuid, title, startDate, endDate, numberOfTickets, priceOfTicket }
+        }
+      })
+    });
 
-  const text = await res.text();
-  if (!res.ok) throw new Error(text);
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error);
+    }
 
-  return text; // tx hash, npr.
+    const result = await response.json();
+    return result.txHash;
+  } catch (error) {
+    console.error("Transaction preparation failed:", error);
+    throw error;
+  }
 }

@@ -45,7 +45,7 @@ export default function Navbar () {
                         width: "200px",
                         height: "100px"
                     }}>
-                        <img id={"logo"} src="/img/logo-light.svg" alt="Logo"
+                        <img id={"logo"} src="/logo.png" alt="Logo"
                              onClick={() => navigate(`home`)}
                              style={{
                                  width: "100%",

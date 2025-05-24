@@ -26,7 +26,6 @@ export async function prepareSignedCreateEventTx({
     const signer = await provider.getSigner();
     const address = await signer.getAddress();
 
-    // Get current gas price from network
     const gasPrice = await provider.getFeeData().then(data => data.gasPrice);
     if (!gasPrice) throw new Error("Could not fetch gas price");
 
@@ -40,7 +39,6 @@ export async function prepareSignedCreateEventTx({
       priceOfTicket
     ]);
 
-    // Estimate gas limit
     const estimatedGas = await provider.estimateGas({
       from: address,
       to: EVENT_MANAGER_ADDRESS,
@@ -67,7 +65,7 @@ export async function prepareSignedCreateEventTx({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         signedTx,
-        txData: { // Additional context for backend
+        txData: { 
           method: "createEvent",
           params: { uuid, title, startDate, endDate, numberOfTickets, priceOfTicket }
         }

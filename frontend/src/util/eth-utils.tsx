@@ -1,7 +1,6 @@
 import { ethers } from "ethers";
 import { CONTRACTS } from "./contract-utils";
 
-const EVENT_MANAGER_ADDRESS = "0xYourContractAddress";
 const RELAY_ENDPOINT = "http://localhost:8080/relay-tx";
 
 export async function prepareSignedCreateEventTx({
@@ -41,7 +40,7 @@ export async function prepareSignedCreateEventTx({
 
     const estimatedGas = await provider.estimateGas({
       from: address,
-      to: EVENT_MANAGER_ADDRESS,
+      to: CONTRACTS.EventManager.address,
       data
     });
     
@@ -49,7 +48,7 @@ export async function prepareSignedCreateEventTx({
 
     const tx = {
       from: address,
-      to: EVENT_MANAGER_ADDRESS,
+      to: CONTRACTS.EventManager.address,
       data,
       value: ethers.parseUnits("0.000001", "ether"),
       gasLimit,

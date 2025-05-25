@@ -69,7 +69,7 @@ export default function LoginForm() {
     return (
         <div id={"form-container"} style={{width: "50%", padding: "10%"}}>
         <div className={"headings"}>
-                <h2>Welcome back to Smartify</h2>
+                <h2>Welcome back to NFT-Ticket-Shop</h2>
                 <h1>Login</h1>
         </div>
 

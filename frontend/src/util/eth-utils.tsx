@@ -25,50 +25,41 @@ export async function prepareSignedCreateEventTx({
     const signer = await provider.getSigner();
     const address = await signer.getAddress();
 
-    const gasPrice = await provider.getFeeData().then(data => data.gasPrice);
-    if (!gasPrice) throw new Error("Could not fetch gas price");
-
-    const contractInterface = new ethers.Interface(CONTRACTS.EventManager.abi);
-    const data = contractInterface.encodeFunctionData("createEvent", [
+    const contract = new ethers.Contract(CONTRACTS.EventManager.address, CONTRACTS.EventManager.abi, signer);
+    
+    // Populate transaction
+    const txRequest = await contract.createEvent.populateTransaction(
       uuid,
       title,
       startDate,
       endDate,
       numberOfTickets,
       priceOfTicket
-    ]);
+    );
 
-    const estimatedGas = await provider.estimateGas({
-      from: address,
-      to: CONTRACTS.EventManager.address,
-      data
-    });
-    
-    const gasLimit = estimatedGas * 120n / 100n;
+    txRequest.from = address;
+    txRequest.value = ethers.parseUnits("0.000001", "ether");
+    txRequest.nonce = await provider.getTransactionCount(address, "latest");
+    txRequest.chainId = (await provider.getNetwork()).chainId;
+    txRequest.gasLimit = await provider.estimateGas(txRequest);
+    txRequest.gasPrice = (await provider.getFeeData()).gasPrice!;
 
-    const tx = {
-      from: address,
-      to: CONTRACTS.EventManager.address,
-      data,
-      value: ethers.parseUnits("0.000001", "ether"),
-      gasLimit,
-      gasPrice,
-      chainId: (await provider.getNetwork()).chainId,
-      nonce: await provider.getTransactionCount(address, "latest")
-    };
+    const unsignedTx = ethers.Transaction.from(txRequest);
+    const serializedUnsignedTx = unsignedTx.unsignedSerialized;
 
-    const signedTx = await signer.signTransaction(tx);
-    
+    const signature = await signer.signMessage(ethers.getBytes(serializedUnsignedTx));
+
     const response = await fetch(RELAY_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        signedTx,
-        txData: { 
+      body: JSON.stringify({
+        serializedUnsignedTx,
+        signature,
+        txData: {
           method: "createEvent",
-          params: { uuid, title, startDate, endDate, numberOfTickets, priceOfTicket }
-        }
-      })
+          params: { uuid, title, startDate, endDate, numberOfTickets, priceOfTicket },
+        },
+      }),
     });
 
     if (!response.ok) {
@@ -78,6 +69,7 @@ export async function prepareSignedCreateEventTx({
 
     const result = await response.json();
     return result.txHash;
+
   } catch (error) {
     console.error("Transaction preparation failed:", error);
     throw error;

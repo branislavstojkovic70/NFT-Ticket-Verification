@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Home from './pages/home/home.tsx';
+import Registration from './pages/auth/registration.tsx';
 
 const theme = createTheme({
   palette: {
@@ -55,6 +56,11 @@ const router = createBrowserRouter([
         path:"/login", 
 		element:
             <Login/>
+    },
+	{
+        path:"/registration", 
+		element:
+            <Registration/>
     },
 ])
 
